@@ -1,9 +1,6 @@
 import click
 
 
-POPULATION_SIZE = 6
-
-
 def fitness(dnr: list) -> int:
     print(dnr)
     score = input("Enter score> ")
@@ -34,12 +31,15 @@ def mutate(dnr: list, seq: list):
         dnr[r] = choice(seq)
 
 
-def evolution(population, size, seq):
-    top = sorted(evaluate(population), key=lambda x: x[0])[:int(POPULATION_SIZE / 2)]
+def evolution(population, size, seq, limit):
+    top = sorted(evaluate(population), key=lambda x: x[0], reverse=True)[:limit]
+    print(top)
     population.clear()
     for i in range(0, len(top)):
         for j in range(i, len(top)):
             population.append(mix(top[i][1], top[j][1], size))
+
+    population += top
 
     for pop in population:
         mutate(pop, seq)
@@ -47,15 +47,16 @@ def evolution(population, size, seq):
 
 @click.command()
 @click.option("--size", help="Sequance length", type=int)
+@click.option("--population_size", help="Population size", type=int, default=6)
 @click.argument("seq", nargs=-1)
-def main(size, seq):
+def main(size, population_size, seq):
     population = [random_dnr(size, seq)
-                  for i in range(0, POPULATION_SIZE)]
+                  for i in range(0, population_size)]
 
     iteration = 1
     while True:
         print("iteration: {0}".format(iteration))
-        evolution(population, size, seq)
+        evolution(population, size, seq, int(population_size / 2))
         iteration += 1
 
 if __name__ == "__main__":
